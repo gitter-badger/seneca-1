@@ -13,7 +13,7 @@ TODO:
 '''
 import os
 import sys
-from execute_sc import execute_contract
+from execute_sc import execute_contract, MainContract, ExecutionData
 from datetime import datetime
 import configparser
 
@@ -132,19 +132,14 @@ def run_contract_file_as_user(contract_file_name, user_id, contract_address):
     show('Storing contract in DB...')
     contract_id = store_contract(contract_str, user_id, contract_address)
 
-    global_run_data = {
-        'caller_user_id': user_id,
-        'caller_contract_id': contract_id,
-    }
+    mc = MainContract(address=contract_id,
+                      author=user_id,
+                      src=contract_str,
+                     )
 
-    this_contract_run_data = {
-        'author': user_id,
-        'execution_datetime': None,
-        'contract_id': contract_address
-    }
-
+    sc_ex_data = ExecutionData(blocktime=datetime.now())
     try:
-        res = execute_contract(global_run_data, this_contract_run_data, contract_str, is_main=True, module_loader=ft_module_loader, db_executer=ex)
+        res = execute_contract(mc, sc_ex_data, module_loader=ft_module_loader, db_executer=ex)
     except:
         show("ERROR: Failure in contract executer (not specifically the contract).")
         finalize_contract_record(contract_address, False, contract_address)

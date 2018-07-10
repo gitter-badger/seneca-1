@@ -17,6 +17,18 @@ from collections import namedtuple
 import os
 import importlib
 import traceback
+from typing import NamedTuple, Callable, TypeVar, Optional
+from seneca.seneca_internal.storage.mysql_spits_executer import Executer as ex_spits
+from seneca.seneca_internal.storage.mysql_executer import Executer as ex_base
+from seneca.seneca_internal.storage.mysql_ro_executer import Executer as ex_ro
+
+from datetime import datetime
+
+db_executer_type = TypeVar(ex_spits,
+                           ex_base,
+                           ex_ro
+)
+
 from seneca.seneca_internal.util import *
 
 from seneca.seneca_internal.parser import basic_ast_whitelist
@@ -210,11 +222,47 @@ def get_read_only_contract_obj(*args, **kwargs):
     return _execute_contract(*args, **kwargs)
 
 
-def execute_contract(*args, **kwargs):
-    kwargs['is_main'] = True
+# Note: When we update to 3.7, consider changing this to DataClasses
+class MainContract(NamedTuple):
+    address: str
+    author: str
+    src: str
+
+
+class ImportedContract(NamedTuple):
+    address: str
+    author: str
+    src: str
+    execution_blocktime: datetime
+
+class ExecutionData(NamedTuple):
+    blocktime: datetime
+
+
+def execute_contract(contract: MainContract,
+                     execution_data: ExecutionData,
+                     module_loader: Callable[[str], MainContract],
+                     db_executer: db_executer_type
+                     ):
     ret = ContractExecutionResult()
     try:
-        res = _execute_contract(*args, **kwargs)
+        global_run_data = {
+            'caller_user_id': contract.author,
+            'caller_contract_id': contract.address,
+
+        }
+        this_contract_run_data = {
+            'author': contract.author,
+            'execution_datetime': None,
+            'contract_id': contract.address
+        }
+
+        res = _execute_contract(global_run_data,
+                                this_contract_run_data,
+                                contract.src,
+                                module_loader=module_loader,
+                                db_executer=db_executer
+                                )
         ret.passed = True
     except Exception as e:
         ret.passed = False

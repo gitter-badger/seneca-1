@@ -147,12 +147,12 @@ def read_row(t_name, r_id):
     return t.select.where(t.id == r_id).run()[0]
 
 
+exports = make_exports()
+
 if __name__ == '__main__':
 #    map(drop_table, ['users', 'roles'])
-
     # Create first user, the author of this contract, and give that user admin perms
     _insert_role('admin', True, True, True, True, True)
     _insert_user(rt.this_contract.author, 'admin')
-
 else:
-    exports = make_exports()
+    pass
