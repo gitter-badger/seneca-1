@@ -122,64 +122,65 @@ exports = {
 
 
 
-def run_tests():
+def run_tests(deps_provider):
     # TODO: Replace with doctest
     ## SETUP ##
     global ex
     global name_space
 
-    import sys
-    from os.path import abspath, dirname
-    import configparser
-    from seneca.seneca_internal.storage.mysql_executer import Executer
-
-    import seneca.load_test_conf as lc
-
-    name_space = 'test_tabular'
-
-    ex_ = Executer(**lc.db_settings)
-
-    def ex__(obj):
-        print('Running Query:')
-        print(obj.to_sql())
-        res = ex_(obj)
-        print(res)
-        print('\n')
-        return res
-
-    ex = ex__
-
-    ## END SETUP ##
-    print('****** STARTING TESTS******')
-
     try:
-        print(drop_table('users'))
-        print('DROPPED TABLE')
-    except:
-        print('Table "users" not already created skipping...')
+        from seneca.seneca_internal.storage.mysql_executer import Executer
 
-    u = create_table('users', [
-    ('first_name', str_len(30), True),
-    ('last_name', str_len(30), True),
-    ('nick_name', str_len(30)),
-    ('balance', int)
-    ])
+        name_space = 'test_tabular'
 
-    print(u.select().run())
+        ex_ = deps_provider(Executer)
+
+        def ex__(obj):
+            print('Running Query:')
+            print(obj.to_sql())
+            res = ex_(obj)
+            print(res)
+            print('\n')
+            return res
+
+        ex = ex__
+
+        ## END SETUP ##
+        print('****** STARTING TESTS******')
+
+        try:
+            print(drop_table('users'))
+            print('DROPPED TABLE')
+        except:
+            print('Table "users" not already created skipping...')
+
+        u = create_table('users', [
+        ('first_name', str_len(30), True),
+        ('last_name', str_len(30), True),
+        ('nick_name', str_len(30)),
+        ('balance', int)
+        ])
+
+        print(u.select().run())
 
 
-    u.insert([
-    {'first_name': 'Test1','last_name': 'l1','nick_name': '1','balance': 10},
-    {'first_name': 'Test2','last_name': 'l2','nick_name': '2','balance': 20},
-    {'first_name': 'Test3','last_name': 'l3','nick_name': '3','balance': 30},
-    ]).run()
+        u.insert([
+        {'first_name': 'Test1','last_name': 'l1','nick_name': '1','balance': 10},
+        {'first_name': 'Test2','last_name': 'l2','nick_name': '2','balance': 20},
+        {'first_name': 'Test3','last_name': 'l3','nick_name': '3','balance': 30},
+        ]).run()
 
 
-    u2 = get_table('users')
+        u2 = get_table('users')
 
-    add_column(u2, ('address', str))
-    print(dir(u2.underlying_obj))
-    drop_column(u2, 'address')
-    print(dir(u2.underlying_obj))
+        add_column(u2, ('address', str))
+        print(dir(u2.underlying_obj))
+        drop_column(u2, 'address')
+        print(dir(u2.underlying_obj))
+        print(u.select().where(and_(u.first_name == 'test' , u.last_name == 'test2')).to_sql())
 
-    print(u.select().where(and_(u.first_name == 'test' , u.last_name == 'test2')).to_sql())
+        obj = lambda: None; obj.failed = 0; return obj
+    except Exception as e:
+        obj = lambda: None; obj.failed = 1; return obj
+
+    return obj

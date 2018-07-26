@@ -78,6 +78,10 @@ def set_up():
     contract_table.create_table().run(ex)
 
 
+def clean_up():
+    ex_.kill()
+
+
 def get_contract_str_from_fs(full_path):
     #full_path = os.path.join(contract_file_path, file_name)
     with open(full_path, 'r') as sc_file:

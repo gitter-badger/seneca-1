@@ -122,6 +122,9 @@ class Executer(object):
 
         return SQLExecutionResult(True, None)
 
+    def kill(self):
+        self.cur.close()
+        self.conn.close()
 
 
 def run_tests():

@@ -25,9 +25,12 @@ class Executer(object):
         for q in queries:
             self(q)
 
+    def kill(self):
+        return self.ex.kill()
 
 
 def run_tests():
+    pass
     '''
     >>> bex = ex_base.Executer(**db_settings)
 

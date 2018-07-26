@@ -346,6 +346,7 @@ def _execute_contract(global_run_data, this_contract_run_data, contract_str, is_
 
 
 def run_tests():
+    pass
     '''
     >>> bex = ex_base.Executer(**db_settings)
 

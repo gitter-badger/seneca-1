@@ -98,18 +98,15 @@ exports = {
 }
 
 
-def run_tests():
+def run_tests(deps_provider):
+    pass
     ## SETUP ##
     global ex
     global name_space
-
-    import sys, json
-    from os.path import abspath, dirname
-    from seneca.seneca_internal.storage.mysql_executer import Executer
-
     name_space = 'test_kv'
-    import seneca.load_test_conf as lc
-    ex_ = Executer(**lc.db_settings)
+
+    from seneca.seneca_internal.storage.mysql_executer import Executer
+    ex_ = deps_provider(Executer)
 
     def ex__(obj):
         print('Running Query:')
@@ -121,18 +118,25 @@ def run_tests():
 
     ex = ex__
 
-    ## END SETUP ##
-    print('****** STARTING TESTS ******')
-
-    kv_name = 'policies'
-    try: drop_kv(kv_name)
-    except: print('No KV "{}" detected, creating...'.format(kv_name))
     try:
-        get_kv(kv_name)
-        raise
+        ## END SETUP ##
+        print('****** STARTING TESTS ******')
+
+        kv_name = 'policies'
+        try: drop_kv(kv_name)
+        except: print('No KV "{}" detected, creating...'.format(kv_name))
+        try:
+            get_kv(kv_name)
+            raise
+        except Exception as e:
+            assert e.args[0]['error_code'] == 1146, 'KV "{}" still exist after dropping'.format(kv_name)
+        p = create_kv(kv_name)
+        obj = lambda: None; obj.failed = 0; return obj
     except Exception as e:
-        assert e.args[0]['error_code'] == 1146, 'KV "{}" still exist after dropping'.format(kv_name)
-    p = create_kv(kv_name)
+        obj = lambda: None; obj.failed = 1; return obj
+
+    return obj
+
     # TODO: fix this test
 #    p.set([
 #        ('hello', 'world'),
