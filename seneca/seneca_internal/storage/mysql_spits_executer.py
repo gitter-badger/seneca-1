@@ -4,7 +4,6 @@ TODO: forbid queries with names matching temp tables
 
 TODO: Currently circumventing main code block that selects special query actions
 '''
-import sys
 import re
 import copy
 import MySQLdb
@@ -33,6 +32,7 @@ def make_temp_name(table_name):
     '''
     return '$temp$' + table_name
 
+
 def make_query_with_temp_name(q):
     '''
     >>> q = mysqli.InsertRows('test_users', ['username', 'first_name', 'balance'],
@@ -47,7 +47,7 @@ def make_query_with_temp_name(q):
     q1.table_name = make_temp_name(q1.table_name)
     return q1
 
-import sys
+
 def CreateTableAction(ex, q):
     '''
     Clear state:
@@ -451,7 +451,7 @@ def run_tests(deps_provider):
     1
 
     '''
-    import doctest
+    import doctest, sys
     import seneca.seneca_internal.storage.mysql_intermediate as mysqli
     import seneca.seneca_internal.storage.easy_db as easy_db
     from typing import Tuple
