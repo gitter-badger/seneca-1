@@ -179,10 +179,10 @@ if __name__ == '__main__':
     results = []
 
     if conf.path:
-        passed, details = test_file(conf.path)
-        if passed:
-            print('\n*** Success ***')
-            sys.exit(0)
+        res = test_file(conf.path)
+        results.append(res)
+        print('\t' + res.summarize(), file=sys.stderr)
+
     else:
         python_files = r_get_by_ext('py')
         seneca_files = r_get_by_ext('seneca')
@@ -199,8 +199,7 @@ if __name__ == '__main__':
             results.append(res)
             print('\t' + res.summarize(), file=sys.stderr)
 
-    print(overall_summary(results))
-
+        print(overall_summary(results))
     failed_tests = sum([x.failed for x in results if x.failed is not None])
 
     if failed_tests > 0:
