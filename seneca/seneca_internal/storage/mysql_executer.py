@@ -238,7 +238,7 @@ def run_tests(deps_provider):
     >>> res.success
     True
     '''
-    
+
     import doctest, sys
     from seneca.seneca_internal.storage.mysql_executer import Executer
     ex = deps_provider(Executer)

@@ -10,6 +10,7 @@ TODO:
   * execution status: pending, executed, failed
 * submit module function
 * module loader function to pass to parse
+* TODO: Real testing functions for Seneca contracts
 '''
 import os
 import sys
@@ -22,13 +23,9 @@ from seneca.seneca_internal.storage.mysql_executer import Executer
 ex_ = None
 
 
-def run_tests():
-    # Intentionally left blank, this file doesn't have any tests.
-    pass
-
-
 def show(*args, **kwargs):
-    print('FT:', *args, **kwargs)
+    pass
+    #print('FT:', *args, **kwargs)
 
 
 def ex(obj):
