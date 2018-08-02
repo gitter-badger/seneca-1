@@ -257,6 +257,10 @@ class Executer(object):
         self.cur = self.conn.cursor()
         self.temp_tables = set()
         self.soft_deleted_tables = set()
+        self._pending_operations = []
+
+    def get_pending(self):
+        return copy.copy(self._pending_operations)
 
     def __call__(self, query):
         q_type = type(query)
@@ -273,13 +277,17 @@ class Executer(object):
                     query = make_query_with_temp_name(query)
 
                 self.cur.execute(query.to_sql())
-                return ex_base.format_result(q_type, self.cur)
+                res = ex_base.format_result(q_type, self.cur)
+                self._pending_operations.append(query)
+                return res
 
             elif q_type in dissallowed_queries:
                 raise Exception('Dissallowed query. Incompatible with SPITS.')
 
             elif q_type in special_action_queries:
-                return special_action_query_dict[q_type](self, query)
+                res = special_action_query_dict[q_type](self, query)
+                self._pending_operations.append(query)
+                return res
 
             else:
                 raise Exception("Unrecognized query type. \
@@ -292,7 +300,7 @@ SPITS does not have the needed info to execute this query.")
     def _clear(self):
         self.temp_tables = set()
         self.soft_deleted_tables = set()
-
+        self._pending_operations = []
 
     def commit(self):
         ''' Tested elsewhere '''
@@ -316,7 +324,6 @@ SPITS does not have the needed info to execute this query.")
         # Purge internal scratch
         self._clear()
 
-
     def rollback(self):
         ''' Tested elsewhere '''
         # DML rollback
@@ -334,15 +341,13 @@ SPITS does not have the needed info to execute this query.")
         # TODO: Error handling
         # TODO: Test atomicity
         for q in queries:
-            self.cur.execute(q.to_sql())
-        self.conn.commit()
+            self.__call__(q)
 
         return ex_base.SQLExecutionResult(True, None)
 
     def kill(self):
         self.cur.close()
         self.conn.close()
-
 
 
 def run_tests(deps_provider):
@@ -443,12 +448,33 @@ def run_tests(deps_provider):
     >>> tmp_with_tmp_name = easy_db.Table.from_existing(make_temp_name(ct.table_name)).run(bex)
     >>> tmp_with_tmp_name.count().run(bex)
     1
+
+    >>> ts = list(map(lambda x: str((type(x), x.__dict__)), spex.get_pending()))
+    >>> print('\\n'.join(ts))
+    (<class 'seneca.seneca_internal.storage.mysql_intermediate.DescribeTable'>, {'table_name': '$temp$test_users'})
+    (<class 'seneca.seneca_internal.storage.mysql_intermediate.CountRows'>, {'table_name': '$temp$test_users', 'criteria': None})
+    (<class 'seneca.seneca_internal.storage.mysql_intermediate.InsertRows'>, {'table_name': '$temp$test_users', 'column_names': ('username',), 'list_of_values_lists': [('test_perm',)]})
+    (<class 'seneca.seneca_internal.storage.mysql_intermediate.CountRows'>, {'table_name': '$temp$test_users', 'criteria': None})
+
     >>> _ = spex.commit()
 
     >>> tmp.count().run(bex)
     1
     >>> tmp.count().run(spex)
     1
+
+    >>> list(map(lambda x: x.to_sql(), spex.get_pending()))
+    ['SELECT COUNT(*) as _count\\nFROM test_users;']
+
+    >>> spex.commit()
+    >>> spex.get_pending()
+    []
+
+    >>> _ = tmp.count().run(spex)
+    >>> _ = spex.get_pending()
+    >>> spex.rollback()
+    >>> spex.get_pending()
+    []
 
     '''
     import doctest, sys
