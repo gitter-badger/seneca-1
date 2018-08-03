@@ -23,11 +23,6 @@ from seneca.seneca_internal.storage.mysql_executer import Executer
 ex_ = None
 
 
-def show(*args, **kwargs):
-    pass
-    #print('FT:', *args, **kwargs)
-
-
 def ex(obj):
     res = ex_(obj)
     return res
@@ -123,13 +118,12 @@ def finalize_contract_record(contract_id, passed, contract_address):
 
 
 def run_contract_file_as_user(contract_file_name, user_id, contract_address):
-    show('Running contract: %s' % contract_file_name)
+    contract_string = get_contract_str_from_fs(contract_file_name)
+    return run_contract_as_user(contract_string, user_id, contract_address)
 
-    show('Getting contract from fs...')
-    contract_str = get_contract_str_from_fs(contract_file_name)
 
-    show('Storing contract in DB...')
-    contract_id = store_contract(contract_str, user_id, contract_address)
+def run_contract_as_user(contract_string, user_id, contract_address):
+    contract_id = store_contract(contract_string, user_id, contract_address)
 
     global_run_data = {
         'caller_user_id': user_id,
@@ -143,22 +137,19 @@ def run_contract_file_as_user(contract_file_name, user_id, contract_address):
     }
 
     try:
-        res = execute_contract(global_run_data, this_contract_run_data, contract_str, is_main=True, module_loader=ft_module_loader, db_executer=ex)
+        res = execute_contract(global_run_data, this_contract_run_data, contract_string, is_main=True, module_loader=ft_module_loader, db_executer=ex)
     except:
-        show("ERROR: Failure in contract executer (not specifically the contract).")
         finalize_contract_record(contract_address, False, contract_address)
         raise
 
     finalize_contract_record(contract_address, res.passed, contract_address)
 
-    show("Contract run completed status:", res, "\n\n")
     if not res:
-        show(":-(")
+        pass
 
     return contract_id
 
 def run_contract(contract_file):
-        show('*** Contract:', contract_file)
         contract_id = contract_file.split('/')[-1].split('.')[0]
 
         run_contract_file_as_user(contract_file, 'this_is_user_id', contract_id)
