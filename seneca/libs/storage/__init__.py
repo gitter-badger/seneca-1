@@ -1,9 +1,10 @@
 import importlib
-import os
+import os, sys
 import seneca.engine.util as util
+from os.path import dirname
 
 from seneca.engine.util import manual_import
-path = os.path.dirname(__file__)
+path = '{}/seneca_libs/storage'.format(dirname(dirname(dirname(sys.executable))))
 
 exports = {}
 

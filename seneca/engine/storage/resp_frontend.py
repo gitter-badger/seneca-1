@@ -132,7 +132,7 @@ class Client:
 def run_tests(deps_provider):
     '''
     '''
-    c = Client(executer = print)
-
-    import doctest, sys
-    return doctest.testmod(sys.modules[__name__], extraglobs={**locals()})
+    # c = Client(executer = print)
+    #
+    # import doctest, sys
+    # return doctest.testmod(sys.modules[__name__], extraglobs={**locals()})

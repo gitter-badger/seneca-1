@@ -27,6 +27,9 @@ lint:
 static-analysis:
 	false
 
+clean-cython:
+	./scripts/clean-cython-files.sh
+
 test:
 	./seneca/test.py
 

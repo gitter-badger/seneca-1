@@ -283,7 +283,7 @@ class Table(RObject):
         return self.get(k)
 
     def __setitem__(self, i, v):
-        return self.set(k, v)
+        return self.set(i, v)
 
 
 class TablePlaceholder(Placeholder):

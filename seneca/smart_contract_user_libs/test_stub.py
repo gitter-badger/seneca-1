@@ -2,8 +2,8 @@
 Seneca test import module, displays caller data.
 '''
 
-# engine injected global var only available within Seneca library modules, not in smart contracts
-# engine.caller
+# seneca_internal injected global var only available within Seneca library modules, not in smart contracts
+# seneca_internal.caller
 import seneca_internal
 
 def _print_caller_data():

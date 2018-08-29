@@ -22,7 +22,19 @@ from seneca.engine.util import *
 from seneca.engine.parser import ast_whitelist
 import seneca.engine.util as util
 
-seneca_lib_path = os.path.join(os.path.realpath(__file__), 'seneca')
+import os, sys
+import seneca.engine.util as util
+from os.path import dirname
+
+import cython, seneca
+if cython.compiled:
+    print(seneca)
+    print("[seneca] Yep, I'm compiled.")
+else:
+    print(seneca)
+    print("[seneca] Just a lowly interpreted script.")
+
+seneca_lib_path = os.path.join(dirname(dirname(dirname(sys.executable))), 'seneca')
 
 # Load module from file, return code as string
 # In real application, a different function will be provided from Cilantro,

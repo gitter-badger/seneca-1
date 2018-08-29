@@ -130,7 +130,7 @@ def test_file(path):
     elif ext == 'seneca':
         return test_seneca_file(path)
     else:
-        print('* ERROR: Unknown file type.', file=sys.stderr)
+        print('* ERROR: Unknown file type.', sys.stderr)
         sys.exit(1)
 
 
@@ -168,7 +168,7 @@ Stats:
 
 if __name__ == '__main__':
     import load_test_conf as lc
-    print('\n*** Running Tests ***', file=sys.stderr)
+    print('\n*** Running Tests ***', sys.stderr)
 
     c_dir = os.path.dirname(os.path.realpath(__file__))
     os.chdir(c_dir)
@@ -183,30 +183,30 @@ if __name__ == '__main__':
     if conf.path:
         res = test_file(conf.path)
         results.append(res)
-        print('\t' + res.summarize(), file=sys.stderr)
+        print('\t' + res.summarize(), sys.stderr)
 
     else:
         python_files = r_get_by_ext('py')
         seneca_files = r_get_by_ext('seneca')
 
-        print('\nTesting Python files...', file=sys.stderr)
+        print('\nTesting Python files...', sys.stderr)
         for f in python_files:
             res = test_file(f)
             results.append(res)
-            print('\t' + res.summarize(), file=sys.stderr)
+            print('\t' + res.summarize(), sys.stderr)
 
-        print('\nTesting Seneca files...', file=sys.stderr)
+        print('\nTesting Seneca files...', sys.stderr)
         for f in seneca_files:
             res = test_file(f)
             results.append(res)
-            print('\t' + res.summarize(), file=sys.stderr)
+            print('\t' + res.summarize(), sys.stderr)
 
         print(overall_summary(results))
     failed_tests = sum([x.failed for x in results if x.failed is not None])
 
     if failed_tests > 0:
-        print('*** Failed ***', file=sys.stderr)
+        print('*** Failed ***', sys.stderr)
         sys.exit(1)
     else:
-        print('*** Testing Complete ***', file=sys.stderr)
+        print('*** Testing Complete ***', sys.stderr)
         sys.exit(0)
